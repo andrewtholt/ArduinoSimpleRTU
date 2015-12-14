@@ -1,0 +1,8 @@
+
+*.o
+sender
+listener
+client
+cscope.out
+
+
