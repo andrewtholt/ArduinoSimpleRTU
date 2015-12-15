@@ -19,6 +19,7 @@ int setInterfaceAttribs (int fd, int speed, int parity) {
   // disable IGNBRK for mismatched speed tests; otherwise receive break
   // as \000 chars
   tty.c_iflag &= ~IGNBRK;         // ignore break signal
+  tty.c_iflag &= ~ICRNL;          // Dont map CR to NL
   tty.c_lflag = 0;                // no signaling chars, no echo,
   // no canonical processing
   tty.c_oflag = 0;                // no remapping, no delays

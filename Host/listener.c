@@ -26,6 +26,21 @@ void usage() {
     exit(0);
 }
 
+int myRead( int fd, uint8_t *ptr, int len) {
+
+    int i=0;
+    int c=0;
+
+    do {
+        i=read(fd,&ptr[c],1);
+        if(i == 1) {
+            printf("%d:%02x\n",i,ptr[c]);
+            c++;
+        }
+    } while( c<len );
+
+}
+
 void displayState( struct data *ptr) {
     int i;
     uint16_t aValue;
@@ -138,7 +153,7 @@ int main(int argc,char *argv[]) {
         state->ioPin[i].direction = UNKNOWN;
     }
 
-    displayState( state );
+    //    displayState( state );
 
 
     if(verbose) {
@@ -157,7 +172,13 @@ int main(int argc,char *argv[]) {
     setBlocking (ser, 1);
 
     memset(inBuffer,0,sizeof(inBuffer));
-    read( ser, inBuffer, 2);
+
+    //    read( ser, inBuffer, 2);
+    if( verbose ) {
+        fprintf(stderr,"Waiting for STart\n");
+    }
+
+    myRead( ser, (uint8_t *)inBuffer, 2);
 
     if( inBuffer[0]=='S' && inBuffer[1]=='T' ) {
         if(verbose) {
@@ -172,28 +193,40 @@ int main(int argc,char *argv[]) {
         }
 
         memset(inBuffer,0,sizeof(struct message));
-        read(ser, inBuffer, sizeof(struct message));
+        myRead( ser, (uint8_t *)inBuffer, sizeof(struct message));
+        //        read(ser, inBuffer, sizeof(struct message));
 
         cmd = (struct message *) inBuffer;
         if(verbose) {
             fprintf(stderr,"Message RX\n");
-            fprintf(stderr,"\t%c%c\n", cmd->cmd[0], cmd->cmd[1]);
+            fprintf(stderr,"cmd\t%c%c\n", cmd->cmd[0], cmd->cmd[1]);
+            fprintf(stderr,"Item\t%02d\n", cmd->item);
+            fprintf(stderr,"v_lo\t%02d\n", cmd->v_lo);
+            fprintf(stderr,"v_hi\t%02d\n", cmd->v_hi);
             fprintf(stderr,"-------------\n");
         }
 
         if( cmd->cmd[0] == 'W' ) {
-            fprintf(stderr,"Write ...\n");
+            if(verbose) {
+                fprintf(stderr,"Write ...\n");
+            }
             if( cmd->cmd[1] == 'A' ) {
-                fprintf(stderr,"... Analog\n");
+                if(verbose) {
+                    fprintf(stderr,"... Analog\n");
+                }
                 aValue = cmd->v_lo & 0xff;
                 aValue |= cmd->v_hi >> 8;
 
                 state->analogValue[cmd->item] = aValue;
             } else if( cmd->cmd[1] == 'D' ) {
-                fprintf(stderr,"... Digital\n");
+                if(verbose) {
+                    fprintf(stderr,"... Digital\n");
+                }
                 state->ioPin[cmd->item].state = cmd->v_lo;
             } else if( cmd->cmd[1] == 'M' ) {
-                fprintf(stderr,"... Mode\n");
+                if(verbose) {
+                    fprintf(stderr,"... Mode\n");
+                }
                 state->ioPin[cmd->item].direction = cmd->v_lo;
             }
 

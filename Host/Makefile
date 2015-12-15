@@ -1,9 +1,9 @@
 
-CC=g++
+CC=gcc
 CFLAGS=-g
 
 BINS=client sender listener sizes
-LIBS=-lrt
+LIBS=-ldl -lrt -pthread 
 
 all:	$(BINS)
 
@@ -17,10 +17,10 @@ client:	client.o serialComms.o serialComms.h
 	$(CC) $(CFLAGS) client.o serialComms.o -o $@
 
 sender:	sender.o serialComms.o serialComms.h
-	$(CC) $(CFLAGS) sender.o serialComms.o -lrt -o $@
+	$(CC) $(CFLAGS) sender.o serialComms.o $(LIBS) -o $@
 
 listener:	listener.o serialComms.o serialComms.h
-	$(CC) $(CFLAGS) listener.o serialComms.o -lrt -o $@
+	$(CC) $(CFLAGS) listener.o serialComms.o $(LIBS) -o $@
 
 serialComms.o:	serialComms.c
 	$(CC) -c $(CLAGS) $? -o $@

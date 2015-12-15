@@ -7,7 +7,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <mqueue.h>
+////  #include <mqueue.h>
+
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
 #include "message.h"
 #include "serialComms.h"
@@ -18,10 +21,16 @@ void usage() {
     printf("\t-d              Debug Mode\n");
     printf("\t-h|-?           Help\n");
     printf("\t-p <port name>  Set serial Port\n");
+    printf("\t-q <qid>        Message queue key\n");
     printf("\t-v              Verbose\n");
 
     exit(0);
 }
+
+struct msg {
+    long mtype;
+    struct message mtext;
+};
 
 int main(int argc,char *argv[]) {
     bool verbose=false;
@@ -32,13 +41,16 @@ int main(int argc,char *argv[]) {
     int ser;
     int len;
 
+    key_t key=42;
+    int qid;
+
     struct message *cmd;
 
     char *serialPort=(char *)NULL;
-    char buffer[8192];   // set this length for mq attributes
+    struct msg buffer;
     char outBuffer[sizeof(struct message)];
 
-    mqd_t clientCmds;
+    //    mqd_t clientCmds;
 
     while ((opt = getopt(argc, argv, "dh?p:v")) != -1) {
         switch(opt) {
@@ -61,6 +73,9 @@ int main(int argc,char *argv[]) {
                     exit(1);
                 }   
                 strcpy(serialPort, optarg);
+                break;
+            case 'q':
+                key = atoi( optarg );
                 break;
             default:
                 break;
@@ -85,19 +100,30 @@ int main(int argc,char *argv[]) {
     setInterfaceAttribs (ser, B19200, 0);
     setBlocking (ser, 1);
 
-    clientCmds = mq_open("/SIMPLE_RTU", O_RDONLY|O_CREAT, S_IRUSR|S_IWUSR,NULL);
-    if( clientCmds < 0) {
-        perror("mq_open");
-        exit(1);
+    if ((qid = msgget(key, 0660)) == -1) {
+        if ((qid = msgget(key, 0666 | IPC_CREAT)) == -1) {
+            perror("msgget");
+            exit(4);
+        }
     }
 
     while( runFlag ) {
-        len = mq_receive( clientCmds, buffer, sizeof(buffer),NULL);
+        //        len = mq_receive( clientCmds, buffer, sizeof(buffer),NULL);
+        len = msgrcv(qid, &buffer,sizeof(struct message), 1, 0);
         if( len < 0) {
             perror("mq_receive");
             exit(3);
         }
-        cmd = (struct message *)buffer;
+        cmd = &(buffer.mtext);
+        if(verbose) {
+            fprintf(stderr,"Message RX\n");
+            fprintf(stderr,"Addr\t%02d\n", cmd->address);
+            fprintf(stderr,"cmd\t%c%c\n", cmd->cmd[0], cmd->cmd[1]);
+            fprintf(stderr,"Item\t%02d\n", cmd->item);
+            fprintf(stderr,"v_lo\t%02d\n", cmd->v_lo);
+            fprintf(stderr,"v_hi\t%02d\n", cmd->v_hi);
+            fprintf(stderr,"-------------\n");
+        }   
 
         memset(outBuffer,0,sizeof(outBuffer));
         memcpy( outBuffer, cmd, sizeof(struct message));
