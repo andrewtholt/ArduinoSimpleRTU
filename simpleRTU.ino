@@ -8,8 +8,11 @@
 #define MY_ADDRESS 0    // ... my address
 
 #define CONFIG 1        // EEPROM location to hold config
-#define DEFAULT_CONFIG 0  
+#define DEFAULT_CONFIG 0x00
 #define ENABLE_SCAN 0x01
+#define ENABLE_ANALOG_SCAN 0x02
+#define ENABLE_DEBUG_OUT 0x04
+
 // 
 // Config Byte
 // 7 - 0
@@ -17,13 +20,18 @@
 // 5
 // 4
 // 3
-// 2
-// 1
+// 2 - 0 Disable o/p to soft serial port., 1 Enable
+// 1 - 0 Disable Analog Scan, 1 Enable.
 // 0 - 0 Disable scan, 1 enable scan
 //
 
 #define SCAN_CONFIG_LO 4
 #define SCAN_CONFIG_HI 5
+
+#define ANALOG_SCAN_CONFIG_LO 6
+#define ANALOG_SCAN_CONFIG_HI 7
+
+#define USER_EEPROM_OFFSET 0x10	// Start of user EEPROM 
 
 #define DEFAULT_SCAN_DELAY_LO 100  // Report inputs every ... in multiples of 
                                    // 10 ms
