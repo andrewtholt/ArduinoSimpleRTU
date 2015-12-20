@@ -7,13 +7,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-////  #include <mqueue.h>
+#include <semaphore.h>
 
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
 #include "message.h"
 #include "serialComms.h"
+#include "data.h"
 
 void usage() {
     printf("\n\tUsage\n");
@@ -27,10 +28,12 @@ void usage() {
     exit(0);
 }
 
+/*
 struct msg {
     long mtype;
     struct message mtext;
 };
+*/
 
 int main(int argc,char *argv[]) {
     bool verbose=false;
@@ -41,7 +44,7 @@ int main(int argc,char *argv[]) {
     int ser;
     int len;
 
-    key_t key=42;
+    key_t key=SENDERQ;
     int qid;
 
     struct message *cmd;
@@ -49,6 +52,10 @@ int main(int argc,char *argv[]) {
     char *serialPort=(char *)NULL;
     struct msg buffer;
     char outBuffer[sizeof(struct message)];
+
+    int shm;
+    sem_t *shmSem;
+    sem_t *startSem;
 
     //    mqd_t clientCmds;
 
@@ -82,6 +89,17 @@ int main(int argc,char *argv[]) {
         }
 
     }
+
+    startSem = sem_open(START_SEM, O_RDWR);
+    if(startSem == SEM_FAILED) {
+        perror("START_SEM");
+        exit(5);
+    }
+
+    // Wait for listener to have received the ST message.
+    sem_wait(startSem);
+
+    sem_post(startSem);
 
     if( serialPort == (char *)NULL) {
         usage();

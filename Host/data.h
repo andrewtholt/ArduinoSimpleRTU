@@ -1,14 +1,11 @@
 
-#define TRUE 1
-#define FALSE 0
-#define UNKNOWN 2
-#define RESERVED 3
+#include "common.h"
 
-#define INPUT 0
-#define OUTPUT 1
+#define ARDUINO_COUNT 16
 
-#define UNO_DIO 14
-#define UNO_ANALOG_IN 6
+#define SHM_SEM "/SHM_SEM"
+#define START_SEM "/START_SEM"
+#define SHM_NAME "/RTUState"
 
 
 struct digitalPins {
@@ -18,10 +15,14 @@ struct digitalPins {
 
 
 
-struct data {
+struct arduino {
     struct digitalPins ioPin[14];
 
     int16_t analogValue[UNO_ANALOG_IN];
+};
+
+struct data {
+    struct arduino data[ARDUINO_COUNT];
 };
 
 

@@ -1,3 +1,4 @@
+load lib.fth
 load struct.fth
 \ load mydump.fth
 
@@ -22,7 +23,15 @@ endstruct /cmd
 -1 value qid
 -1 value ptr
 -1 value shm
+-1 value shmSem
+-1 value startSem
+
 0 value initRun
+
+: .semvalue ( semid -- )
+    sem-getvalue abort" sem-getvalue failed."
+    ." sem-getvalue : " . cr
+;
 
 : init
     initRun 0= if
@@ -32,6 +41,9 @@ endstruct /cmd
 
         s" /RTUState" O_RDWR 0x1b0 shm-open abort" shm-open" to shm
         shm 0 40 mmap abort" mmap failed." to ptr
+
+        s" SHM_SEM" O_RDWR sem-open abort" SHM_SEM" to shmSem
+        s" START_SEM" O_RDWR sem-open abort" START_SEM" to startSem
     then
 ;
 
