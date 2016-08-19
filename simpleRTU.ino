@@ -149,6 +149,7 @@ void handleSC( struct message *cmd) {
     }   
 }
 
+// Set Mode
 void handleSM( struct message *cmd) {
     mySerial.println("->SM");
 
