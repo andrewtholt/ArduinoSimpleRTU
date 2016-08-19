@@ -6,7 +6,7 @@ PATH=$PATH:/home/andrewh/Arduino/sketchbook/simpleRTU/Host
 starter
 
 if [ $? -ne 0 ]; then
-    echo "Startet failed."
+    echo "Starter failed."
     exit 1
 fi
 

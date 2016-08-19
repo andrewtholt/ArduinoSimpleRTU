@@ -211,7 +211,7 @@ int main(int argc,char *argv[]) {
 
         //    read( ser, inBuffer, 2);
         if( verbose ) {
-            fprintf(stderr,"Waiting for STart\n");
+            fprintf(stderr,"Waiting for Start\n");
         }
 
         myRead( ser, (uint8_t *)inBuffer, 2);
