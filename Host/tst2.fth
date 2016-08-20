@@ -1,5 +1,8 @@
 load lib.fth
 load struct.fth
+
+\ Uses sysV ipc mechanisms
+\ 
 \ load mydump.fth
 
 \ struct message {
@@ -9,6 +12,9 @@ load struct.fth
 \    uint8_t v_lo;
 \    uint8_t v_hi;
 \ };
+
+1 constant OUTPUT
+0 constant INPUT
 
 42 constant MSG_KEY
 struct 
@@ -114,6 +120,13 @@ endstruct /cmd
 
 : main
     init
+    2 1 set-pin
+    2 OUTPUT set-mode
+
+    3 1 set-pin
+    3 OUTPUT set-mode
+
+
     command 16 dump
 ;
 

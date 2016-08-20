@@ -1,3 +1,4 @@
+\ Uses Posic, willneed modified sender/listener
 
 s" POSIX_IPC" environment? 0= abort" POSIX_IPC Not available" drop
 
@@ -76,7 +77,10 @@ c-message --> new cmd
     cmd --> set-item
 
     cmd --> display
-    mqd cmd --> get-data 0 mq-send abort" mq-send Failed." 
+    mqd cmd --> get-data 
+
+    .s 
+    0 mq-send abort" mq-send Failed." 
 ;
 
 : get-analog \ channel
