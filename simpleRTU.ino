@@ -170,6 +170,30 @@ void handleSM( struct message *cmd) {
     sendBytes( (uint8_t*)cmd,sizeof(struct message));
 }
 
+// Digital Toggle 
+// WT
+void handleWT( struct message *cmd) {
+    
+    uint8_t tmp;
+    
+    mySerial.println("->WT");
+    getBytes(&cmd->item,1);
+    getBytes(&cmd->v_lo,1);  
+    getBytes(&cmd->v_hi,1);  
+    
+    cmd->cmd[1] = 'D';
+    
+     tmp = digitalRead(cmd->item);
+     if( tmp ) {
+         // Output is true.  So make it false
+         cmd->v_lo = 0;
+     } else {
+         // Output is false.  So make it true.
+         cmd->v_lo = 1;
+     }
+    digitalWrite( cmd->item, cmd->v_lo );
+}
+
 // Write Digital
 void handleWD( struct message *cmd ) {
     mySerial.println("->WD");
@@ -260,6 +284,11 @@ void loop() {
             //
             handleRD( &cmd );
 
+        } else if (cmd.cmd[0] == 'W' && cmd.cmd[1] == 'T') {
+            // 
+            // Toggle digital
+            // 
+            handleWT( &cmd) ;
         }
     } else if(scanEnabled()) {
         if( currentMillis - previousMillis >= getScanDelay() ) {

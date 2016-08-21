@@ -96,6 +96,17 @@ endstruct /cmd
     command /cmd  qid msg-send abort" msg-send"
 ;
 
+: toggle-pin  \ bit 
+    0 command v_lo c!
+    command item c!
+
+    s" WT" command cmd swap move
+    0 command address c!
+    0 command v_hi c!
+
+    command /cmd  qid msg-send abort" msg-send"
+;
+
 : get-analog \ channel
     command item c!
     0 command v_lo c!
@@ -120,8 +131,12 @@ endstruct /cmd
 
 : main
     init
-    2 1 set-pin
-    2 OUTPUT set-mode
+
+    13 OUTPUT set-pin   \ Set LED to out
+    13 0 set-pin        \ Switch LED off
+
+    2 1 set-pin         \ Switch relay off
+    2 OUTPUT set-mode   \ pin to out
 
     3 1 set-pin
     3 OUTPUT set-mode
