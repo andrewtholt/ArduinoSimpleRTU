@@ -129,19 +129,38 @@ endstruct /cmd
     command /cmd  qid msg-send abort" msg-send"
 ;
 
+: update
+    4 0 do
+        i get-pin
+    loop
+;
+
 : main
     init
+    ptr 8 1 fill
+    update
 
-    13 OUTPUT set-pin   \ Set LED to out
-    13 0 set-pin        \ Switch LED off
+\ Arduino settings    
+\    13 OUTPUT set-pin   \ Set LED to out
+\    13 0 set-pin        \ Switch LED off
+\ 
+\    2 1 set-pin         \ Switch relay off
+\    2 OUTPUT set-mode   \ pin to out
+\ 
+\    3 1 set-pin
+\    3 OUTPUT set-mode
+\    cmd 16 dump
 
-    2 1 set-pin         \ Switch relay off
-    2 OUTPUT set-mode   \ pin to out
+    0 OUTPUT set-pin
+    1 OUTPUT set-pin
+    2 OUTPUT set-pin
+    3 OUTPUT set-pin
 
-    3 1 set-pin
-    3 OUTPUT set-mode
+    0 0 set-pin
+    1 0 set-pin
+    2 0 set-pin
+    3 0 set-pin
 
-
-    command 16 dump
+    ptr 16 dump
 ;
 
