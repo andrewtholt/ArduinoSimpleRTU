@@ -187,10 +187,6 @@ int main(int argc,char *argv[]) {
        }
        */
 
-    if(debug) {
-    }
-
-
     if(verbose) {
         // displayState( &(state->data[0]) );
         printf("\nSerial Port:%s\n",serialPort);
@@ -242,7 +238,7 @@ int main(int argc,char *argv[]) {
     while(runFlag) {
 
         if( debug ) {
-            // displayState( &(state->data[0]) );
+            displayState( &(state->data[0]) );
         }
 
         printf("sizeof message %d\n", (int)sizeof(struct message));
