@@ -115,7 +115,8 @@ int main(int argc,char *argv[]) {
         exit(2);
     }
 
-    setInterfaceAttribs (ser, B19200, 0);
+    // setInterfaceAttribs (ser, B19200, 0);
+    setInterfaceAttribs (ser, B115200, 0);
     setBlocking (ser, 1);
 
     if ((qid = msgget(key, 0660)) == -1) {

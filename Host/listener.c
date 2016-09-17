@@ -16,6 +16,9 @@
 
 // #define SHM_NAME "/RTUState"
 
+// global debug flag
+bool debug;
+
 void usage() {
     printf("\n\tUsage\n");
 
@@ -35,7 +38,9 @@ int myRead( int fd, uint8_t *ptr, int len) {
     do {
         i=read(fd,&ptr[c],1);
         if(i == 1) {
-            //            printf("%d:%02x\n",i,ptr[c]);
+            if(debug) {
+                printf("%d:%02x\n",i,ptr[c]);
+            }
             c++;
         }
     } while( c<len );
@@ -91,7 +96,6 @@ void displayState( struct arduino *ptr) {
 
 int main(int argc,char *argv[]) {
     bool verbose=false;
-    bool debug=false;
     bool runFlag=true;
     bool ok = false;
 
@@ -119,6 +123,7 @@ int main(int argc,char *argv[]) {
 
     uint16_t aValue;
 
+    debug=false;
     while ((opt = getopt(argc, argv, "dh?p:v")) != -1) {
         switch(opt) {
             case 'd':
@@ -183,15 +188,15 @@ int main(int argc,char *argv[]) {
        */
 
     if(debug) {
-        displayState( &(state->data[0]) );
     }
 
 
     if(verbose) {
+        // displayState( &(state->data[0]) );
         printf("\nSerial Port:%s\n",serialPort);
     }
 
-    sem_wait(startSem);
+    // sem_wait(startSem);
 
     ser = open (serialPort, O_RDONLY | O_NOCTTY | O_SYNC);
 
@@ -202,7 +207,8 @@ int main(int argc,char *argv[]) {
         //        exit(2);
     } else {
 
-        setInterfaceAttribs (ser, B19200, 0);
+        // setInterfaceAttribs (ser, B19200, 0);
+        setInterfaceAttribs (ser, B115200, 0);
         setBlocking (ser, 1);
 
         memset(inBuffer,0,sizeof(inBuffer));
@@ -236,9 +242,10 @@ int main(int argc,char *argv[]) {
     while(runFlag) {
 
         if( debug ) {
-            displayState( &(state->data[0]) );
+            // displayState( &(state->data[0]) );
         }
 
+        printf("sizeof message %d\n", (int)sizeof(struct message));
         memset(inBuffer,0,sizeof(struct message));
         myRead( ser, (uint8_t *)inBuffer, sizeof(struct message));
         //        read(ser, inBuffer, sizeof(struct message));
