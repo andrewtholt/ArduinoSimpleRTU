@@ -100,7 +100,7 @@ endstruct /cmd
     0 command v_lo c!
     command item c!
 
-    s" WT" command cmd swap move
+    s" TD" command cmd swap move
     0 command address c!
     0 command v_hi c!
 
@@ -132,8 +132,22 @@ endstruct /cmd
 : update
     4 0 do
         i get-pin
+        100 ms
     loop
 ;
+
+: all-off
+    4 0 do
+        i 0 set-pin
+    loop
+;
+
+: all-on
+    4 0 do
+        i 1 set-pin
+    loop
+;
+
 
 : main
     init

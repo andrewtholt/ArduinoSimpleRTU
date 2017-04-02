@@ -15,3 +15,9 @@ RD - Read Digital.
 RA - Read Analog.
 
 WA - Write Analog.
+
+
+
+
+
+

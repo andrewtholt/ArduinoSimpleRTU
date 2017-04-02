@@ -9,6 +9,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <semaphore.h>
+#include <unistd.h>
+#include <signal.h>
 
 #include "serialComms.h"
 #include "message.h"
@@ -30,6 +32,16 @@ void usage() {
     exit(0);
 }
 
+void alarmHandler(int sig ) {
+
+}
+// 
+// delay, time to wait before resetting pointer.
+// 
+// After receiving the first char, start a timer.
+// after receiving the last char stop the timer.
+// If the timer expires reset the count and wait.
+//
 int myRead( int fd, uint8_t *ptr, int len) {
 
     int i=0;
@@ -37,13 +49,21 @@ int myRead( int fd, uint8_t *ptr, int len) {
 
     do {
         i=read(fd,&ptr[c],1);
+        ualarm(1000,0);
         if(i == 1) {
             if(debug) {
                 printf("%d:%02x\n",i,ptr[c]);
             }
             c++;
+        } else if ( i < 0) {
+            if(debug) {
+                printf("Reset\n");
+            }
+            c=0;
+            ualarm(0,0);
         }
     } while( c<len );
+    ualarm(0,0);
 
 }
 
@@ -53,7 +73,8 @@ void displayState( struct arduino *ptr) {
 
     printf("Digital Pins\n\n");
 
-    for(i=0;i<UNO_DIO;i++) {
+    // for(i=0;i<UNO_DIO;i++) {
+    for(i=0;i< 4;i++) {
         printf("\tPin %02d State:",i);
 
         switch( ptr->ioPin[i].state ) {
@@ -95,6 +116,11 @@ void displayState( struct arduino *ptr) {
 }
 
 int main(int argc,char *argv[]) {
+
+    struct sigaction act;
+    act.sa_handler = alarmHandler;
+    sigaction(SIGALRM, &act,0);
+
     bool verbose=false;
     bool runFlag=true;
     bool ok = false;
@@ -203,8 +229,9 @@ int main(int argc,char *argv[]) {
         //        exit(2);
     } else {
 
-        // setInterfaceAttribs (ser, B19200, 0);
         setInterfaceAttribs (ser, B115200, 0);
+        // setInterfaceAttribs (ser, B19200, 0);
+        // setInterfaceAttribs (ser, B9600, 0);
         setBlocking (ser, 1);
 
         memset(inBuffer,0,sizeof(inBuffer));
@@ -216,13 +243,15 @@ int main(int argc,char *argv[]) {
             fprintf(stderr,"Waiting for Start\n");
         }
 
-        myRead( ser, (uint8_t *)inBuffer, 2);
+        /*
+        myRead( ser, (uint8_t *)inBuffer, 6);
 
-        if( inBuffer[0]=='S' && inBuffer[1]=='T' ) {
+        if( inBuffer[1]=='S' && inBuffer[2]=='T' ) {
             if(verbose) {
                 fprintf(stderr,"Start received\n");
             }
         }
+        */
     }
     sem_post(startSem);
 
@@ -244,7 +273,7 @@ int main(int argc,char *argv[]) {
         printf("sizeof message %d\n", (int)sizeof(struct message));
         memset(inBuffer,0,sizeof(struct message));
         myRead( ser, (uint8_t *)inBuffer, sizeof(struct message));
-        //        read(ser, inBuffer, sizeof(struct message));
+        // read(ser, inBuffer, sizeof(struct message));
 
         cmd = (struct message *) inBuffer;
 
